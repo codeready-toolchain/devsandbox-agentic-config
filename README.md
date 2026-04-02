@@ -46,6 +46,7 @@ directories and are tracked normally.
 |---|---|
 | `analyze-only` | Deep analysis and recommendations without making any changes |
 | `design-with-questions` | Structured design mode: generates a design document and a companion questions document, then walks through decisions one by one |
+| `jira-stories` | Translates design/planning/task documents into JIRA stories that follow the agreed upon Dev Sandbox template |
 | `pr-comment` | Analyzes a PR review comment critically and addresses it with appropriate code changes |
 | `promote-to-adr` | Converts an implemented proposal from `docs/proposals/` into a numbered ADR under `docs/adr/` |
 | `research` | Performs comprehensive internet research with source citations and synthesis |
