@@ -50,6 +50,7 @@ directories and are tracked normally.
 | `promote-to-adr` | Converts an implemented proposal from `docs/proposals/` into a numbered ADR under `docs/adr/` |
 | `research` | Performs comprehensive internet research with source citations and synthesis |
 | `verify-design-document` | Reviews a design document for internal consistency, codebase alignment, and gaps |
+| `commit` | Analyze uncommitted changes, create a branch if needed, and git commit with a well-structured message |
 
 ## Linting
 
