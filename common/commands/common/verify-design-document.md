@@ -2,7 +2,7 @@
 
 Carefully and systematically review the provided design document to verify it is
 **consistent**, **aligned with the current codebase**, and **free of meaningful
-gaps**.
+gaps**. **Fix everything you can, then ask about the rest.**
 
 ---
 
@@ -52,13 +52,7 @@ Build a thorough understanding of the relevant parts of the system:
 
 ---
 
-## Output
+## Act on findings
 
-Present your findings as a structured review:
-
-1. **Summary** — one paragraph overall assessment
-2. **Issues** — numbered list, each with severity (high / medium / low),
-   location in the document, and a clear description of the problem
-3. **Suggestions** — optional improvements that aren't strictly issues
-
-Do **not** modify the design document. Report findings only.
+If the fix is obvious, apply it directly. If you need user input to resolve
+something, ask. Report what you fixed and what you need input on.
