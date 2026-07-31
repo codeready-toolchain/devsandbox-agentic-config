@@ -4,8 +4,8 @@
 addressed.**
 
 Treat the user's input as the reviewer's feedback. Your job is to **decide**
-whether to implement, disagree, clarify, or skip — not to make the review
-green by default.
+whether to **Implement**, **Skip**, **Clarify**, or **Alternative** — not to
+make the review green by default.
 
 ---
 
@@ -42,18 +42,20 @@ both:
 
 **"Still valid" means still true in the code — not "must implement."** Valid but
 unnecessary nits (theoretical TOCTOU, speculative caching, style-only refactors
-with large blast radius) should use the **disagree / skip** path unless the
-user explicitly wants them.
+with large blast radius) should use **Skip** (disagreement is a common
+rationale) unless the user explicitly wants them.
 
 ### Before implementing security, concurrency, or perf nits
 
 State in your reasoning (and to the user if you will change code):
 
-1. **Scenario** — the concrete failure or race (actors, timing, preconditions)
+1. **Scenario** — the relevant concrete case: failure mode, abuse path, or
+   performance impact (actors, timing/preconditions, and what goes wrong)
 2. **Likelihood** — why it would or would not happen in this product/path
-3. **Decision** — implement / skip / ask
+3. **Decision** — exactly one of: Implement / Skip / Clarify / Alternative
 
-If you cannot name a plausible scenario, **do not implement**; disagree or ask.
+If you cannot name a plausible scenario for the concern, **do not implement**;
+use Skip or Clarify.
 
 ### Critical: Understand Full Implications
 
@@ -65,56 +67,68 @@ If you cannot name a plausible scenario, **do not implement**; disagree or ask.
 - **API contracts:** Changing interfaces affects all consumers
 - **Database schema:** Model changes require migration scripts and all affected
   queries
-- **Tests:** Implementation changes require corresponding test updates
+- **Tests:** Implementation changes may require corresponding test updates
 - **Documentation:** Code changes may need doc updates
 
-**If you choose to implement and the suggestion requires changes beyond what's
+**If you choose Implement and the suggestion requires changes beyond what's
 explicitly mentioned, make those changes too.** A partial implementation is
-worse than no implementation. If the full fix is large, say so and confirm
-before proceeding.
+worse than no implementation. If the full fix is large, prefer **Alternative**
+or **Clarify** and confirm before proceeding.
 
 ## 3. Decision Gate (required before coding)
 
-Pick **one** outcome and tell the user briefly which it is:
+Pick **exactly one** named outcome and tell the user that name before coding:
 
-1. **Implement** — sound, necessary, and proportionate; then follow §4
-2. **Disagree / skip** — explain why (scenario unlikely, inconsistent with
-   siblings, cost outweighs benefit, reviewer mistaken); **do not** change code
-   unless the user overrides
+1. **Implement** — sound, necessary, and proportionate; then follow §4 and §5
+2. **Skip** — do not change code unless the user overrides. Common rationales:
+   disagreement (scenario unlikely, inconsistent with siblings, cost outweighs
+   benefit), reviewer mistaken, or finding already fixed. Explain why.
 3. **Clarify** — ask before changing anything
-4. **Partial / alternative** — propose a smaller fix or different approach;
-   implement only after the user agrees if the delta is non-trivial
+4. **Alternative** — propose a smaller fix or different approach; do not
+   implement a non-trivial delta until the user agrees
+
+Do **not** use other labels (e.g. "Disagree", "Partial") as the decision name.
+Disagreement is a **rationale for Skip**. A smaller/different approach is
+**Alternative**, not a vague "partial".
 
 Do **not** optimize for "address every bullet in the review." Optimize for a
 correct product decision.
 
 ## 4. Response Strategy
 
-### If you implement
+### If Implement
 
 - Acknowledge the useful part of the feedback
-- Implement the fix (or a justified alternative)
-- Explain briefly if your change differs from the suggestion
-- Add or adjust tests when behavior changes
+- Implement the fix
+- Explain briefly if your change differs from the suggestion in small ways
+- Update tests only when required by §5
 - Update documentation if relevant
 
-### If the comment is unclear
+### If Clarify
 
 - **Ask for clarification** before making changes
 - Explain your current understanding and why it might be ambiguous
-- Suggest alternatives if you have ideas about what they meant
+- Suggest options if you have ideas about what they meant
 
-### If you disagree or skip
+### If Skip
 
 - Respectfully explain with technical justification (scenario + likelihood +
-  cost)
+  cost, or why the finding is already addressed / mistaken)
 - Provide context the reviewer might have missed (including sibling patterns)
-- Suggest alternatives or a middle ground when useful
+- Suggest an Alternative or middle ground when useful
 - Stay open to discussion — you might be missing something too
+
+### If Alternative
+
+- Name the outcome **Alternative** explicitly
+- State what you would change instead of (or instead of fully following) the
+  reviewer's suggestion, and why it is better or more proportionate
+- Ask the user to accept or reject before coding if the delta is non-trivial
+- If they accept, then follow §5; if they reject, stop or **Clarify** further
 
 ## 5. Implementation Guidelines
 
-Only after choosing **Implement** (or the user accepts an alternative):
+Only after choosing **Implement**, or after the user accepts an **Alternative**:
 
 - **Make comprehensive changes:** Modify everything necessary to fully address
   the comment, including related components
@@ -140,11 +154,16 @@ Only after choosing **Implement** (or the user accepts an alternative):
 Before considering the comment addressed:
 
 - [ ] Have I distinguished soundness from necessity?
-- [ ] For nits: did I name a concrete scenario (or skip/disagree)?
+- [ ] For nits: did I name a concrete scenario (failure mode, abuse path, or
+      performance impact) — or Skip / Clarify?
 - [ ] Did I compare with sibling/existing patterns?
-- [ ] Did I pick an explicit decision (implement / skip / clarify / alternative)
-      before coding?
-- [ ] If I implemented: is the change proportionate and complete (tests, callers)?
-- [ ] If I skipped: did I explain clearly enough for the user to reply to the
-      reviewer?
+- [ ] Did I name exactly one decision — **Implement**, **Skip**, **Clarify**,
+      or **Alternative** — before coding?
+- [ ] If **Skip**: did I explain clearly enough for the user to reply to the
+      reviewer (including disagreement rationale when applicable)?
+- [ ] If **Alternative**: did I propose the approach and get agreement before a
+      non-trivial change?
+- [ ] If **Implement** (or accepted Alternative): is the change proportionate
+      and complete; did I run the repo's canonical full validation (including
+      build) and rerun any failing target after fixes?
 - [ ] Have I communicated the rationale to the user?
