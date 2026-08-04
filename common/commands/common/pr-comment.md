@@ -3,8 +3,9 @@
 **The user's message contains a Pull Request review comment that needs to be
 addressed.**
 
-Treat the user's input as the reviewer's feedback. Your task is to analyze this
-comment critically and respond appropriately.
+Treat the user's input as the reviewer's feedback. Your job is to **decide**
+whether to **Implement**, **Skip**, **Clarify**, or **Alternative** — not to
+make the review green by default.
 
 ---
 
@@ -19,21 +20,42 @@ Follow this systematic approach:
 - Read the files mentioned or implied by the comment
 - Use recently viewed files, or file context to identify relevant files
 - Understand the current implementation before proceeding
+- Check how **sibling code** handles the same concern (other tools, callers,
+  established patterns in this repo). Inconsistency is a signal the suggestion
+  may be over-scoped.
 
 ## 2. Analysis Phase
 
-**Do not blindly implement the suggestion.** First, analyze the comment by:
+**Do not blindly implement the suggestion.** Analyze before writing code.
 
-- **Understanding the reviewer's intent:** What is the concern, suggestion, or
-  question?
-- **Examining the code in question:** Read the relevant files and surrounding
-  context
-- **Validating the comment:** The reviewer may be mistaken or lack full context;
-  think critically
-- **Assessing the impact:** Consider how any proposed change affects the broader
-  codebase
-- **Checking project standards:** Ensure alignment with existing conventions and
-  rules
+### Soundness vs necessity
+
+A comment can be **technically correct** and still **not worth doing**. Judge
+both:
+
+| Question | Ask |
+|----------|-----|
+| Sound? | Is the finding still true against current code? Is the reviewer mistaken or missing context? |
+| Necessary? | What concrete scenario does this prevent or improve? How likely is it here? |
+| Proportionate? | Does the added complexity/cost match the realistic risk or benefit? |
+| Consistent? | Do peer paths (similar tools/APIs) already accept the same tradeoff? |
+
+**"Still valid" means still true in the code — not "must implement."** Valid but
+unnecessary nits (theoretical TOCTOU, speculative caching, style-only refactors
+with large blast radius) should use **Skip** (disagreement is a common
+rationale) unless the user explicitly wants them.
+
+### Before implementing security, concurrency, or perf nits
+
+State in your reasoning (and to the user if you will change code):
+
+1. **Scenario** — the relevant concrete case: failure mode, abuse path, or
+   performance impact (actors, timing/preconditions, and what goes wrong)
+2. **Likelihood** — why it would or would not happen in this product/path
+3. **Decision** — exactly one of: Implement / Skip / Clarify / Alternative
+
+If you cannot name a plausible scenario for the concern, **do not implement**;
+use Skip or Clarify.
 
 ### Critical: Understand Full Implications
 
@@ -45,36 +67,68 @@ Follow this systematic approach:
 - **API contracts:** Changing interfaces affects all consumers
 - **Database schema:** Model changes require migration scripts and all affected
   queries
-- **Tests:** Implementation changes require corresponding test updates
+- **Tests:** Implementation changes may require corresponding test updates
 - **Documentation:** Code changes may need doc updates
 
-**If the suggestion requires changes beyond what's explicitly mentioned, make
-those changes too.** A partial implementation is worse than no implementation.
+**If you choose Implement and the suggestion requires changes beyond what's
+explicitly mentioned, make those changes too.** A partial implementation is
+worse than no implementation. If the full fix is large, prefer **Alternative**
+or **Clarify** and confirm before proceeding.
 
-## 3. Response Strategy
+## 3. Decision Gate (required before coding)
 
-### If the comment is valid
+Pick **exactly one** named outcome and tell the user that name before coding:
 
-- **Acknowledge the feedback** positively
-- **Implement the suggested fix** or improvement
-- **Explain your changes** briefly if they differ from the suggestion
-- **Add tests** if the change affects functionality
-- **Update documentation** if relevant
+1. **Implement** — sound, necessary, and proportionate; then follow §4 and §5
+2. **Skip** — do not change code unless the user overrides. Common rationales:
+   disagreement (scenario unlikely, inconsistent with siblings, cost outweighs
+   benefit), reviewer mistaken, or finding already fixed. Explain why.
+3. **Clarify** — ask before changing anything
+4. **Alternative** — propose a smaller fix or different approach; do not
+   implement a non-trivial delta until the user agrees
 
-### If the comment is unclear
+Do **not** use other labels (e.g. "Disagree", "Partial") as the decision name.
+Disagreement is a **rationale for Skip**. A smaller/different approach is
+**Alternative**, not a vague "partial".
+
+Do **not** optimize for "address every bullet in the review." Optimize for a
+correct product decision.
+
+## 4. Response Strategy
+
+### If Implement
+
+- Acknowledge the useful part of the feedback
+- Implement the fix
+- Explain briefly if your change differs from the suggestion in small ways
+- Update tests only when required by §5
+- Update documentation if relevant
+
+### If Clarify
 
 - **Ask for clarification** before making changes
-- **Explain your current understanding** and why it might be ambiguous
-- **Suggest alternatives** if you have ideas about what they meant
+- Explain your current understanding and why it might be ambiguous
+- Suggest options if you have ideas about what they meant
 
-### If you disagree with the comment
+### If Skip
 
-- **Respectfully explain your reasoning** with technical justification
-- **Provide context** the reviewer might have missed
-- **Suggest alternatives** if there's a middle ground
-- **Be open to discussion** - you might be missing something too
+- Respectfully explain with technical justification (scenario + likelihood +
+  cost, or why the finding is already addressed / mistaken)
+- Provide context the reviewer might have missed (including sibling patterns)
+- Suggest an Alternative or middle ground when useful
+- Stay open to discussion — you might be missing something too
 
-## 4. Implementation Guidelines
+### If Alternative
+
+- Name the outcome **Alternative** explicitly
+- State what you would change instead of (or instead of fully following) the
+  reviewer's suggestion, and why it is better or more proportionate
+- Ask the user to accept or reject before coding if the delta is non-trivial
+- If they accept, then follow §5; if they reject, stop or **Clarify** further
+
+## 5. Implementation Guidelines
+
+Only after choosing **Implement**, or after the user accepts an **Alternative**:
 
 - **Make comprehensive changes:** Modify everything necessary to fully address
   the comment, including related components
@@ -95,16 +149,21 @@ those changes too.** A partial implementation is worse than no implementation.
 - **Check for linter errors:** Fix any new warnings or errors introduced in all
   modified files
 
-## 5. Final Checklist
+## 6. Final Checklist
 
 Before considering the comment addressed:
 
-- [ ] Have I fully understood the comment's intent?
-- [ ] Have I analyzed the relevant code thoroughly?
-- [ ] Is my response or implementation technically sound?
-- [ ] Have I identified ALL affected components (backend, frontend, database,
-      tests, docs)?
-- [ ] Have I made changes in all necessary areas, not just the directly
-      mentioned code?
-- [ ] Are tests passing and linter errors resolved across all modified files?
-- [ ] Have I communicated my approach and rationale clearly to the user?
+- [ ] Have I distinguished soundness from necessity?
+- [ ] For nits: did I name a concrete scenario (failure mode, abuse path, or
+      performance impact) — or Skip / Clarify?
+- [ ] Did I compare with sibling/existing patterns?
+- [ ] Did I name exactly one decision — **Implement**, **Skip**, **Clarify**,
+      or **Alternative** — before coding?
+- [ ] If **Skip**: did I explain clearly enough for the user to reply to the
+      reviewer (including disagreement rationale when applicable)?
+- [ ] If **Alternative**: did I propose the approach and get agreement before a
+      non-trivial change?
+- [ ] If **Implement** (or accepted Alternative): is the change proportionate
+      and complete; did I run the repo's canonical full validation (including
+      build) and rerun any failing target after fixes?
+- [ ] Have I communicated the rationale to the user?
