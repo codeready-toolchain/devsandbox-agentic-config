@@ -1,3 +1,7 @@
+---
+description: "Analyze uncommitted changes, create a branch if needed, and git commit with a well-structured message."
+---
+
 # Commit Changes
 
 Analyze uncommitted changes, create a branch if needed, and commit with a well-structured message.

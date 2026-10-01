@@ -1,3 +1,7 @@
+---
+description: "Translates design/planning/task documents into JIRA stories that follow the agreed upon Dev Sandbox template"
+---
+
 # JIRA story guidelines
 Guidelines for taking a design document, planning document or task document and translating them into a set of JIRA stories.
 

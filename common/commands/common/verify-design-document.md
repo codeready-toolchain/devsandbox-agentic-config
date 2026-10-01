@@ -1,3 +1,7 @@
+---
+description: "Reviews a design document for internal consistency, codebase alignment, and gaps"
+---
+
 # Verify Design Document
 
 Carefully and systematically review the provided design document to verify it is

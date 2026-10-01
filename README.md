@@ -3,56 +3,65 @@
 The repository holds the common configurations, rules and skills used by the
 Developer Sandbox team to develop, maintain and improve their projects.
 
-## Required packages
+## Optional tools
 
-- `stow` if you want to "autoinstall" the contents.
-- [Podman](https://podman.io/) to run the Markdown linter, which runs
-  [markdownlint](https://github.com/markdownlint/markdownlint) inside a
-  container.
+- [Podman](https://podman.io/) if you want to run the local Markdown linter
+  (`make lint`).
 
 ## How to install the common directives
 
-1. Create the `.cursor` —or any other agent's directory— in the target repository.
-2. Create the appropriate symlinks with stow using the following command:
+From this repository, link the shared commands into a target project:
 
-   ```bash
-   export PATH_DEVSANDBOX_AGENTIC_CONFIG_REPO="path/to/devsandbox-agentic-config"
-   export TARGET_REPOSITORY="path/to/target/repository"
-   stow --no-folding \
-     --dir="${PATH_DEVSANDBOX_AGENTIC_CONFIG_REPO}" \
-     --target="${TARGET_REPOSITORY}"/.cursor \
-     common
-   ```
+```bash
+make install TARGET=/path/to/repo
+```
 
-   The `--no-folding` flag ensures stow creates individual file symlinks instead
-   of symlinking the entire directory. This allows each repository to add its own
-   commands, skills and rules along with the common ones.
+`TARGET` is the project root and must already exist. The command creates two
+directory symlinks, both pointing at `common/commands/common`:
 
-3. Add the following line to the target repository's `.gitignore` to prevent the
-   common symlinks from being committed:
+- `.cursor/commands/common` — Cursor slash commands, for example `/common/commit`
+- `.claude/commands/common` — Claude Code slash commands, for example
+  `/common:commit`. Grok Build reads this directory when its Claude
+  compatibility scan is on.
 
-   ```gitignore
-   .cursor/**/common/
-   ```
+A new command file in this repo shows up in an already-installed project
+without running `make install` again. Re-running it is safe. An older install
+that is a real directory of per-file symlinks is replaced. Repository-specific
+commands stay beside `common/`, for example `.cursor/commands/my-command.md`.
 
-Common directives (commands, rules, skills) are placed under `common/`
-subdirectories inside `.cursor/` so they can all be excluded with a single
-`.gitignore` rule. Repository-specific directives live alongside the `common/`
-directories and are tracked normally.
+Codex has no project commands directory. When this repo contains
+`common/skills/<name>/SKILL.md`, the same command also links that skill into
+`.agents/skills/<name>` and `.claude/skills/<name>`. Those two directories
+cover Codex, Cursor, Claude Code, and Grok. A skill linked into both can show
+up twice in Cursor. There are no shared skills yet, so a current install links
+commands only.
+
+Ignore the command links in the target repository so they are not committed.
+Leave off the trailing slash so Git ignores the symlink itself:
+
+```gitignore
+.cursor/**/common
+.claude/**/common
+```
 
 ## Available commands
 
 | Command | Description |
 |---|---|
 | `analyze-only` | Deep analysis and recommendations without making any changes |
+| `check-and-fix` | Run this repo's verification and fix every failure until it passes |
+| `create-tests` | Write practical tests for the current change, using this repo's own test conventions |
 | `design-with-questions` | Structured design mode: generates a design document and a companion questions document, then walks through decisions one by one |
 | `jira-stories` | Translates design/planning/task documents into JIRA stories that follow the agreed upon Dev Sandbox template |
+| `lint-and-fix` | Run this repo's linters, fix every finding, then confirm build and tests still pass |
 | `pr-comment` | Critically analyzes a PR review comment and chooses Implement, Skip, Clarify, or Alternative — not “make the review green” by default |
 | `promote-to-adr` | Converts an implemented proposal from `docs/proposals/` into a numbered ADR under `docs/adr/` |
 | `research` | Performs comprehensive internet research with source citations and synthesis |
+| `sketch-with-questions` | Produce a high-level technical sketch and a questions document, then walk through the questions one at a time |
 | `verify-design-document` | Reviews a design document for internal consistency, codebase alignment, and gaps |
 | `commit` | Analyze uncommitted changes, create a branch if needed, and git commit with a well-structured message |
 
 ## Linting
 
-Markdown files can be linted with `make lint`.
+`make lint` is optional and local. GitHub CI does not run it. These files are
+instructions for agents, so markdown style is not a merge requirement.
