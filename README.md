@@ -25,8 +25,9 @@ directory symlinks, both pointing at `common/commands/common`:
   compatibility scan is on.
 
 A new command file in this repo shows up in an already-installed project
-without running `make install` again. Re-running it is safe. An older install
-that is a real directory of per-file symlinks is replaced. Repository-specific
+without running `make install` again. Re-running it is safe when `common` is
+already a symlink. A real `common` directory is left in place. Replace it
+with `make install TARGET=/path/to/repo OVERWRITE=1`. Repository-specific
 commands stay beside `common/`, for example `.cursor/commands/my-command.md`.
 
 Codex has no project commands directory. When this repo contains

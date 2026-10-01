@@ -1,5 +1,6 @@
 # Install shared commands and skills into a target repository.
 # Usage: make install TARGET=/path/to/repo
+# Replace an existing real commands/common directory: OVERWRITE=1
 
 AGENTIC_CONFIG_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/..)
 
@@ -38,8 +39,9 @@ install:
 		echo "Missing commands directory: $$commands" >&2; \
 		exit 1; \
 	fi; \
-	link_dir "$$commands" "$$TARGET/.cursor/commands/common" yes; \
-	link_dir "$$commands" "$$TARGET/.claude/commands/common" yes; \
+	replace_commands="$(if $(filter 1 yes true,$(OVERWRITE)),yes,no)"; \
+	link_dir "$$commands" "$$TARGET/.cursor/commands/common" "$$replace_commands"; \
+	link_dir "$$commands" "$$TARGET/.claude/commands/common" "$$replace_commands"; \
 	skills="$$ROOT/common/skills"; \
 	if [ -d "$$skills" ]; then \
 		while IFS= read -r skill_md; do \
