@@ -1,3 +1,7 @@
+---
+description: "Critically analyzes a PR review comment and chooses Implement, Skip, Clarify, or Alternative — not “make the review green” by default"
+---
+
 # Pull Request Review Comment - Context
 
 **The user's message contains a Pull Request review comment that needs to be

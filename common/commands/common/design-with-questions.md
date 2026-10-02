@@ -1,3 +1,7 @@
+---
+description: "Structured design mode: generates a design document and a companion questions document, then walks through decisions one by one"
+---
+
 # /design-with-questions
 
 You are in design mode. Generate **two documents** and then walk through the questions together.

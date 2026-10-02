@@ -1,3 +1,7 @@
+---
+description: "Performs comprehensive internet research with source citations and synthesis"
+---
+
 # Comprehensive Internet Research
 
 Perform thorough internet research to gather the most current and comprehensive

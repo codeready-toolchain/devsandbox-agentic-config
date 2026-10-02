@@ -1,3 +1,7 @@
+---
+description: "Converts an implemented proposal from `docs/proposals/` into a numbered ADR under `docs/adr/`"
+---
+
 # Promote Proposal to ADR
 
 Move an implemented proposal from `docs/proposals/` to `docs/adr/` as a numbered

@@ -1,3 +1,7 @@
+---
+description: "Produce a high-level technical sketch and a questions document, then walk through the questions one at a time"
+---
+
 # /sketch-with-questions
 
 You are in sketch mode. The feature or idea is not yet well-defined enough for a detailed design. Your job is to produce a high-level technical sketch and a questions document, then walk through the questions one at a time to form the sketch. Do not attempt detailed architecture, implementation plans, or interface definitions — those belong in a `/design-with-questions` session.
